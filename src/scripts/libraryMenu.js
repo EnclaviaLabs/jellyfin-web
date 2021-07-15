@@ -918,7 +918,7 @@ import Headroom from 'headroom.js';
             pageTitleElement.innerHTML = '';
         }
 
-        document.title = 'Jellyfin';
+        document.title = 'Zatoka';
     }
 
     function setTitle (title) {

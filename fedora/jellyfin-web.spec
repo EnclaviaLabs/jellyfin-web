@@ -18,7 +18,7 @@ BuildRequires: nodejs
 AutoReqProv:    no
 
 %description
-Jellyfin is a free software media system that puts you in control of managing and streaming your media.
+"Zatoka" is a free software media system that puts you in control of managing and streaming your media.
 
 
 %prep

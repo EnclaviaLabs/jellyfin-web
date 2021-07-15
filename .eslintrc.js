@@ -11,7 +11,7 @@ module.exports = {
     env: {
         node: true,
         es6: true,
-        es2017: true,
+        es2017: false,
         es2020: true
     },
     parserOptions: {

@@ -21,6 +21,7 @@ import ServerConnections from '../../../components/ServerConnections';
 import shell from '../../../scripts/shell';
 import SubtitleSync from '../../../components/subtitlesync/subtitlesync';
 import { appRouter } from '../../../components/appRouter';
+import { XPRplayer } from '../video/xpr-player'
 
 /* eslint-disable indent */
 
@@ -72,7 +73,12 @@ import { appRouter } from '../../../components/appRouter';
             });
         }
 
+        
         function updateDisplayItem(itemInfo) {
+
+            var wasEverHere = false;
+            
+
             const item = itemInfo.originalItem;
             currentItem = item;
             const displayItem = itemInfo.displayItem || item;
@@ -84,6 +90,18 @@ import { appRouter } from '../../../components/appRouter';
             }
 
             setTitle(displayItem, parentName);
+
+            if(!wasEverHere)
+            {
+                console.log('was NOT here')
+                setupXPRprogressText();
+                wasEverHere = true;
+            }
+            else
+            {
+                console.log('was here')
+            }
+            
 
             const secondaryMediaInfo = view.querySelector('.osdSecondaryMediaInfo');
             const secondaryMediaInfoHtml = mediaInfo.getSecondaryMediaInfoHtml(displayItem, {
@@ -127,6 +145,9 @@ import { appRouter } from '../../../components/appRouter';
             return datetime.getDisplayTime(date).toLowerCase().replace('am', '').replace('pm', '').trim();
         }
 
+
+        
+        
         function setDisplayTime(elem, date) {
             let html;
 
@@ -136,6 +157,78 @@ import { appRouter } from '../../../components/appRouter';
             }
 
             elem.innerHTML = html || '';
+        }
+
+        
+
+
+        var xprCurrentTick = -1;//-15;
+        var totalXPRSpentInSession = 0;
+        const XPR_TICK_TIME = 2000;//20000;
+        const XPR_TICKS = 6;
+        const XPR_PRICE_PER_LOOP = .5;
+
+        if(window.xprStreamer)
+        {
+            console.log('JEST JUZ window.xprStreamer.currentTick', window.xprStreamer.currentTick);
+            
+        }
+        else 
+        {
+            window.xprStreamer = {
+                currentTick: 0
+            }
+
+            setInterval(() => {
+
+                var progressTXTdiv = document.getElementById('progressTXT')
+                var progressCMD = document.getElementById('progressCMD');
+    
+                
+                if(window.location.hash != '#!/video')
+                {
+                    console.log('do nothing');
+                    xprCurrentTick = -1;// 15
+                    totalXPRSpentInSession = 0;
+                }
+                else
+                {
+                    // console.log('#!/video');
+                    if(xprCurrentTick==XPR_TICKS)
+                    {
+                        xprCurrentTick = 0;
+                        totalXPRSpentInSession = totalXPRSpentInSession + XPR_PRICE_PER_LOOP;
+                        progressTXTdiv.innerHTML = '.....🚩';
+                        progressCMD.innerHTML = totalXPRSpentInSession + " XPR";
+                    }
+                    else
+                    {
+                        
+                        if(xprCurrentTick==0) progressTXTdiv.innerHTML      = '&#x1F3F4;.....'
+                        else if(xprCurrentTick==1) progressTXTdiv.innerHTML = '.&#x1F3F4;....'
+                        else if(xprCurrentTick==2) progressTXTdiv.innerHTML = '..&#x1F3F4;...'
+                        else if(xprCurrentTick==3) progressTXTdiv.innerHTML = '...&#x1F3F4;..'
+                        else if(xprCurrentTick==4) progressTXTdiv.innerHTML = '....&#x1F3F4;.'
+                        else if(xprCurrentTick==5) progressTXTdiv.innerHTML = '.....&#x1F3F4;'
+                        xprCurrentTick = xprCurrentTick + 1;        
+                        window.xprStreamer.currentTick++;            
+                    }
+                }
+    
+                
+    
+                console.log('---tick/totalXPRSpentInSession', xprCurrentTick, totalXPRSpentInSession);
+            }, XPR_TICK_TIME);
+        }
+
+        
+
+
+        function setupXPRprogressText()
+        {
+            console.log('setXPRprogressText - XPR_TICK_TIME', XPR_TICK_TIME);
+        
+
         }
 
         function shouldEnableProgressByTimeOfDay(item) {
@@ -264,6 +357,8 @@ import { appRouter } from '../../../components/appRouter';
         }
 
         function showMainOsdControls() {
+            // console.log('showMainOsdControls');
+
             if (!currentVisibleMenu) {
                 const elem = osdBottomElement;
                 currentVisibleMenu = 'osd';
@@ -304,7 +399,7 @@ import { appRouter } from '../../../components/appRouter';
         function resetIdle() {
             // Restart hide timer if OSD is currently visible and there is no opened dialog
             if (currentVisibleMenu && !mouseIsDown && !getOpenedDialog()) {
-                startOsdHideTimer();
+                // startOsdHideTimer();
             } else {
                 stopOsdHideTimer();
             }
@@ -417,10 +512,13 @@ import { appRouter } from '../../../components/appRouter';
         }
 
         function onPlayerChange() {
+            console.log('XPR onPlayerChange');
+
             bindToPlayer(playbackManager.getCurrentPlayer());
         }
 
         function onStateChanged(event, state) {
+            
             const player = this;
 
             if (state.NowPlayingItem) {
@@ -445,10 +543,12 @@ import { appRouter } from '../../../components/appRouter';
         }
 
         function onPlaybackStart(e, state) {
-            console.debug('nowplaying event: ' + e.type);
+            console.debug('XPR starts event: ' + e.type, state);
             const player = this;
             onStateChanged.call(player, e, state);
             resetUpNextDialog();
+
+            const xrpPlayer  = new XPRplayer(player);
         }
 
         function resetUpNextDialog() {
@@ -462,6 +562,7 @@ import { appRouter } from '../../../components/appRouter';
         }
 
         function onPlaybackStopped(e, state) {
+            console.debug('XPR STOP event: ' + e.type, state);
             currentRuntimeTicks = null;
             resetUpNextDialog();
             console.debug('nowplaying event: ' + e.type);
@@ -472,7 +573,14 @@ import { appRouter } from '../../../components/appRouter';
             }
         }
 
+        function onXPRclicked(cEvent)
+        {
+            console.debug('onXPRclicked', cEvent);
+        }
+
         function onMediaStreamsChanged() {
+            console.debug('XPR onMediaStreamsChanged');
+
             const player = this;
             const state = playbackManager.getPlayerState(player);
             onStateChanged.call(player, {
@@ -626,6 +734,9 @@ import { appRouter } from '../../../components/appRouter';
 
         function updatePlayerStateInternal(event, player, state) {
             const playState = state.PlayState || {};
+
+            
+            
             updatePlayPauseState(playState.IsPaused);
             const supportedCommands = playbackManager.getSupportedCommands(player);
             currentPlayerSupportedCommands = supportedCommands;
@@ -1253,6 +1364,7 @@ import { appRouter } from '../../../components/appRouter';
         const transitionEndEventName = dom.whichTransitionEvent();
         const headerElement = document.querySelector('.skinHeader');
         const osdBottomElement = document.querySelector('.videoOsdBottom-maincontrols');
+        const progressTXT = document.getElementById('progressTXT')
 
         nowPlayingPositionSlider.enableKeyboardDragging();
         nowPlayingVolumeSlider.enableKeyboardDragging();
@@ -1270,6 +1382,7 @@ import { appRouter } from '../../../components/appRouter';
                 Events.on(playbackManager, 'playerchange', onPlayerChange);
                 bindToPlayer(playbackManager.getCurrentPlayer());
                 /* eslint-disable-next-line compat/compat */
+                console.log('XPR - bindToPlayer(playbackManager.getCurrentPlayer()')
                 dom.addEventListener(document, window.PointerEvent ? 'pointermove' : 'mousemove', onPointerMove, {
                     passive: true
                 });

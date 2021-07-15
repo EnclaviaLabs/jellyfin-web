@@ -1,8 +1,7 @@
 {
-  "name": "jellyfin-web",
-  "version": "10.8.0",
-  "description": "Web interface for Jellyfin",
-  "repository": "https://github.com/jellyfin/jellyfin-web",
+  "name": "zatoka-web",
+  "version": "0.6.2",
+  "description": "Web interface for PirateVOD",
   "license": "GPL-2.0-or-later",
   "devDependencies": {
     "@babel/core": "^7.14.0",

@@ -3,24 +3,9 @@
   "multiserver": false,
   "themes": [
     {
-      "name": "Apple TV",
-      "id": "appletv"
-    }, {
-      "name": "Blue Radiance",
-      "id": "blueradiance"
-    }, {
-      "name": "Dark",
+      "name": "Ciemny",
       "id": "dark",
       "default": true
-    }, {
-      "name": "Light",
-      "id": "light"
-    }, {
-      "name": "Purple Haze",
-      "id": "purplehaze"
-    }, {
-      "name": "WMC",
-      "id": "wmc"
     }
   ],
   "servers": [],

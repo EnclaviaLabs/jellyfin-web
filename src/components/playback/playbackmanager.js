@@ -594,6 +594,8 @@ function isHostReachable(mediaSource, apiClient) {
                 }
             }
 
+            console.log('getEndpointInfo');
+
             return Promise.resolve(true);
         }
 
@@ -955,7 +957,7 @@ class PlaybackManager {
             currentTargetInfo = targetInfo;
 
             if (targetInfo) {
-                console.debug('Active player: ' + JSON.stringify(targetInfo));
+                console.debug('XPR player: ' + JSON.stringify(targetInfo));
             }
 
             if (previousPlayer) {
